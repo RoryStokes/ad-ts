@@ -13,12 +13,10 @@ class None {
     readonly _t = "None"
 }
 
-type OptionTagMap<A> = {
+type Option<A> = MatchableUnion<{
     Some: Some<A>
     None: None
-}
-
-type Option<A> = MatchableUnion<OptionTagMap<A>> // Option<A> | None
+}> // Some<A> | None
 
 const valueOrEmpty = (a: Option<string>) => match(a)({
     Some: ({value}) => value,
