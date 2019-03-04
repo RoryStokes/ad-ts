@@ -21,7 +21,7 @@ type OptionTagMap<A> = {
 type Option<A> = MatchableUnion<OptionTagMap<A>> // Option<A> | None
 
 const valueOrEmpty = (a: Option<string>) => match(a)({
-    Some: () => 'value',
+    Some: ({value}) => value,
     None: () => "Empty"
 })
 
@@ -45,13 +45,12 @@ const Bar = CaseClass("Bar")<{
     label: string
 }>()
 
-type FoobarTagMap = {
+type Foobar = MatchableUnion<{
     Foo: ReturnType<typeof Foo>
     Bar: ReturnType<typeof Bar>
-}
-type Foobar = MatchableUnion<FoobarTagMap>
+}>
 
-const getLabel = (fb: Foobar) => match<FoobarTagMap, string>(fb)({
+const getLabel = (fb: Foobar) => match(fb)({
     Foo: ({name, colour}) => `${colour} ${name}`,
     Bar: ({label}) => label
 });
