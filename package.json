@@ -4,7 +4,17 @@
   "description": "ADTs for TypeScript",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
   "devDependencies": {
-    "typescript": "^3.3.3"
+    "@types/jest": "^24.0.9",
+    "ts-jest": "^24.0.0",
+    "typescript": "^3.3.3",
+    "jest": "^24.1.0"
+  },
+  "dependencies": {
+    "fp-ts": "^1.14.3",
+    "io-ts": "^1.8.2"
   }
 }
