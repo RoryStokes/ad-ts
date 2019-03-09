@@ -1,4 +1,4 @@
-# AD﹘Ts
+# AD-Ts
 [![build status](https://img.shields.io/travis/RoryStokes/ad-ts/master.svg?style=flat-square)](https://travis-ci.org/RoryStokes/ad-ts)
 [![npm downloads](https://img.shields.io/npm/dt/@rorystokes/ad-ts.svg)](https://www.npmjs.com/package/@rorystokes/ad-ts)
 
