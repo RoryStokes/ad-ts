@@ -11,17 +11,20 @@ interface OptionalType<P> {
 }
 export type DecodePattern<S, P> = {
     decode: (input: S) => OptionalType<P>
-}
-export type FnIsPattern<S> = ((input: S) => boolean)
-export type FnDecodePattern<S,P> = ((input: S) => Option<P>)
+} & PatternTag<S, P>
+export type FnIsPattern<S> = ((input: S) => boolean) & PatternTag<S, S>
+export type FnDecodePattern<S, P> = ((input: S) => Option<P>) & PatternTag<S, P>
 
-export type Pattern<S, P> = DecodePattern<S,P> | FnIsPattern<S> | FnDecodePattern<S,P>
+export type Pattern<S, P> = DecodePattern<S, P> | FnIsPattern<S> | FnDecodePattern<S, P>
+
 export type PatternMatchTagMapping<S> = {
-    [k in string]: Pattern<S, any> & PatternTag<S, any>
+    [k in string]: Pattern<S, any>
+} & {
+    _S?: S
 }
 
 type PatternMatchMapping<S, MU extends PatternMatchTagMapping<S>, ResultType> = {
-    [K in keyof MU]: ((match: Exclude<MU[K]['_A'], undefined>) => ResultType)
+    [K in keyof MU]: ((match: NonNullable<MU[K]['_A']>) => ResultType)
 }
 
 const isOption = <P>(o: OptionalType<P>): o is Option<P> => o._URI === "Option"
@@ -41,8 +44,8 @@ const getExtractor = <S, P>(p: Pattern<S,P>): ((s: S) => Option<P>) => (s: S) =>
 type GenericMapping<R> = ({}) => R
 
 
-export const patternmatch = <S, P extends PatternMatchTagMapping<S>>(patterns: P) =>
-    <ResultType>(mappings: PatternMatchMapping<S,P, ResultType>) => {
+export const patternmatch = <S>(patterns: PatternMatchTagMapping<S>) =>
+    <ResultType>(mappings: PatternMatchMapping<S,typeof patterns, ResultType>) => {
         const extractors = Object.assign({}, ...Object.keys(mappings).map(k => ({[k]: getExtractor(patterns[k])})));
         return (input: S) =>  Object.keys(patterns).reduce((result: Option<ResultType>, tag: string) => result.orElse(() =>
             extractors[tag](input).map(<GenericMapping<ResultType>> mappings[tag])
