@@ -1,20 +1,25 @@
 {
-  "name": "ad.ts",
-  "version": "1.0.0",
+  "name": "@rorystokes/ad-ts",
+  "version": "0.0.1",
   "description": "ADTs for TypeScript",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "prepare": "yarn build",
+    "build": "tsc",
     "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^24.0.9",
     "ts-jest": "^24.0.0",
     "typescript": "^3.3.3",
-    "jest": "^24.1.0"
+    "jest": "^24.1.0",
+    "io-ts": "^1.8.2"
   },
   "dependencies": {
-    "fp-ts": "^1.14.3",
-    "io-ts": "^1.8.2"
-  }
+    "fp-ts": "^1.14.3"
+  },
+  "files": [
+    "lib"
+  ]
 }
