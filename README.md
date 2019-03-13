@@ -8,7 +8,7 @@ Bringing Pattern Matching and other ADT and Functional Programming concepts to T
 
 ### Do syntax
 ```ts
-import { doOn } from './do';
+import { doOn } from '@rorystokes/ad-ts/do';
 import { Either, either, left, right } from 'fp-ts/lib/Either';
 
 const numberOrError = (s: string): Either<string, number> => {
