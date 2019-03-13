@@ -1,6 +1,6 @@
 # AD-Ts
 [![build status](https://img.shields.io/travis/RoryStokes/ad-ts/master.svg?style=flat-square)](https://travis-ci.org/RoryStokes/ad-ts)
-[![npm downloads](https://img.shields.io/npm/dt/@rorystokes/ad-ts.svg)](https://www.npmjs.com/package/@rorystokes/ad-ts)
+[![npm downloads](https://img.shields.io/npm/dt/@rorystokes/ad-ts.svg?style=flat-square)](https://www.npmjs.com/package/@rorystokes/ad-ts)
 
 Bringing Pattern Matching and other ADT and Functional Programming concepts to TypeScript
 
@@ -114,6 +114,10 @@ const checkNumber = patternmatch<number>({ Square, IsInteger })({
     Square: ({ sqrt, i }) => `${i} is ${sqrt}^2`,
     IsInteger: (i) => `${i} is an integer`
 })
+
+checkNumber(3)    // some("3 is an integer")
+checkNumber(4)    // some("4 is 2^2")
+checkNumber(5.6)  // none
 ```
 
 ## With fp-ts

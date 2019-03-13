@@ -1,6 +1,6 @@
 {
   "name": "@rorystokes/ad-ts",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "ADTs for TypeScript",
   "main": "index.js",
   "license": "MIT",
