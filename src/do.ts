@@ -3,7 +3,7 @@ import { Monad, Monad1, Monad2 } from "fp-ts/lib/Monad";
 
 type DoExpr<URI extends string, Context extends {}, Output> = HKT<URI, Output> | ((context: Context) => HKT<URI, Output>)
 
-type EqFn<Context extends {}, Output> = (context: Context) => Output
+type EqExpr<Context extends {}, Output extends Exclude<any, Function>> = ((context: Context) => Output) | Output
 
 type NewContext<Context extends {}, NewProps extends string, Output> = Context & {
     [prop in NewProps]: Output
@@ -24,11 +24,11 @@ export class DoContextImpl<URI extends string, Context extends {}> {
         }))
     }
     
-    with<Output, NewProp extends string>(prop: NewProp, fn: EqFn<Context, Output>) {
+    with<Output, NewProp extends string>(prop: NewProp, valueOrFn: EqExpr<Context, Output>) {
         return new DoContextImpl<URI, NewContext<Context, NewProp, Output>>(this.monad, this.monad.map(this.context, (context) => (
             <NewContext<Context, NewProp, Output>>{
                 ...context,
-                [prop]: fn(context)
+                [prop]: isFn(valueOrFn) ? valueOrFn(context) : valueOrFn
             }
         )))
     }
@@ -55,7 +55,7 @@ export type DoContext<URI extends URIS, Context extends {}> = {
      * @param prop the name of the property
      * @param fn a function from the current context to the value to be assigned
      */
-    with<Output, NewProp extends string>(prop: NewProp, fn: EqFn<Context, Output>): 
+    with<Output, NewProp extends string>(prop: NewProp, fn: EqExpr<Context, Output>): 
         DoContext<URI, NewContext<Context, NewProp, Output>>
         
     yield<Output>(fn: (context: Context) => Output): Type<URI, Context>
@@ -78,7 +78,7 @@ export type DoContext2<URI extends URIS2, Context extends {}, A> = {
      * @param prop the name of the property
      * @param fn a function from the current context to the value to be assigned
      */
-    with<Output, NewProp extends string>(prop: NewProp, fn: EqFn<Context, Output>): 
+    with<Output, NewProp extends string>(prop: NewProp, fn: EqExpr<Context, Output>): 
         DoContext2<URI, NewContext<Context, NewProp, Output>, A>
 
     /**
@@ -98,7 +98,6 @@ export function doOn<URI extends URIS>(monad: Monad1<URI>): DoContext<URI, {}>;
  * @param monad the fp-ts Monad2 definition
  */
 export function doOn<URI extends URIS2>(monad: Monad2<URI>): DoContext2<URI, {}, never>;
-export function doOn<URI extends URIS | URIS2>(monad: Monad1<URIS & URI> | Monad2<URIS2 & URI>) {
-    const m = <Monad<URI>> <any> monad
-    return <any> new DoContextImpl(m, m.of({}))
+export function doOn<URI>(monad: any) {
+    return <any> new DoContextImpl(monad, monad.of({}))
 }

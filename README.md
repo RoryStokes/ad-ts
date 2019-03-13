@@ -22,7 +22,7 @@ const sqrtOrError = (n: number): Either<string, number> => {
 }
 
 const testString = (s: string) => doOn(either)
-    .with("s", () => s)
+    .with("s", s)
     .bind("n", ({s}) => numberOrError(s))
     .bind("sqrt", ({n}) => sqrtOrError(n))
     .yield(({sqrt}) => sqrt)
