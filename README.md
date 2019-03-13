@@ -2,11 +2,11 @@
 [![build status](https://img.shields.io/travis/RoryStokes/ad-ts/master.svg?style=flat-square)](https://travis-ci.org/RoryStokes/ad-ts)
 [![npm downloads](https://img.shields.io/npm/dt/@rorystokes/ad-ts.svg)](https://www.npmjs.com/package/@rorystokes/ad-ts)
 
-Bringing Pattern Matching and other ADT and Functional Programming based niceness to TypeScript
+Bringing Pattern Matching and other ADT and Functional Programming concepts to TypeScript
 
 ## Getting Started
 
-### Do syntax (NEW)
+### Do syntax
 ```ts
 import { doOn } from './do';
 import { Either, either, left, right } from 'fp-ts/lib/Either';
