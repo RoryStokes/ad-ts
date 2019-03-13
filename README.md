@@ -2,9 +2,35 @@
 [![build status](https://img.shields.io/travis/RoryStokes/ad-ts/master.svg?style=flat-square)](https://travis-ci.org/RoryStokes/ad-ts)
 [![npm downloads](https://img.shields.io/npm/dt/@rorystokes/ad-ts.svg)](https://www.npmjs.com/package/@rorystokes/ad-ts)
 
-A vague attempt to bring Pattern matching and other ADT based niceness to TypeScript
+Bringing Pattern Matching and other ADT and Functional Programming based niceness to TypeScript
 
 ## Getting Started
+
+### Do syntax (NEW)
+```ts
+import { doOn } from './do';
+import { Either, either, left, right } from 'fp-ts/lib/Either';
+
+const numberOrError = (s: string): Either<string, number> => {
+    const n = Number.parseFloat(s)
+    return Number.isNaN(n) ? left(`'${s}' is not a number`) : right(n)
+}
+
+const sqrtOrError = (n: number): Either<string, number> => {
+    const sqrt = Math.sqrt(n)
+    return Number.isInteger(sqrt) ? right(sqrt) : left(`${n} is not a square number]`)
+}
+
+const testString = (s: string) => doOn(either)
+    .with("s", () => s)
+    .bind("n", ({s}) => numberOrError(s))
+    .bind("sqrt", ({n}) => sqrtOrError(n))
+    .yield(({sqrt}) => sqrt)
+
+testString("9")       // right(3)
+testString("8")       // left("8 is not a square number")
+testString("seven")   // left("'seven' is not a number")
+```
 
 ### Matching on Classes
 ```ts

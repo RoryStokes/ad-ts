@@ -1,12 +1,7 @@
-import { URIS, Type, URIS2, Type2 } from "fp-ts/lib/HKT";
-import { Monad1, Monad2 } from "fp-ts/lib/Monad";
-import { URI } from "fp-ts/lib/Either";
+import { HKT, URIS, Type, URIS2, Type2 } from "fp-ts/lib/HKT";
+import { Monad, Monad1, Monad2 } from "fp-ts/lib/Monad";
 
-type ForFn<URI extends URIS, Context extends {}, Output> = ((context: Context) => Type<URI, Output>)
-type ForExpr<URI extends URIS, Context extends {}, Output> = Type<URI, Output> | ForFn<URI, Context, Output>
-
-type ForFn2<URI extends URIS2, Context extends {}, A, Output> = ((context: Context) => Type2<URI, A, Output>)
-type ForExpr2<URI extends URIS2, Context extends {}, A, Output> = Type2<URI, A, Output> | ForFn2<URI, Context, A, Output>
+type DoExpr<URI extends string, Context extends {}, Output> = HKT<URI, Output> | ((context: Context) => HKT<URI, Output>)
 
 type EqFn<Context extends {}, Output> = (context: Context) => Output
 
@@ -16,19 +11,11 @@ type NewContext<Context extends {}, NewProps extends string, Output> = Context &
 
 const isFn = (fn: any): fn is Function => typeof fn === "function"
 
-const isFn2 = <URI extends URIS, Context extends {}, Output>(fn: ForExpr<URI, Context, Output>): 
-    fn is ForFn<URI, Context, Output> => typeof fn === "function"
+export class DoContextImpl<URI extends string, Context extends {}> {
+    constructor(private readonly monad: Monad<URI>, readonly context: HKT<URI, Context>) { }
 
-
-export class DoContext<URI extends URIS, Context extends {}> {
-    constructor(private readonly monad: Monad1<URI>, readonly context: Type<URI, Context>) { }
-    /**
-     * Binds a property in the context to a wrapped value derived from the current context
-     * @param prop the name of the property
-     * @param value the wrapped value to be bound, or a function from the current context to a wrapped value to be bound
-     */
-    bind<Output, NewProp extends string>(prop: NewProp, value: ForExpr<URI, Context, Output>) {
-        return new DoContext<URI, NewContext<Context, NewProp, Output>>(this.monad, this.monad.chain(this.context, (context) => {
+    bind<Output, NewProp extends string>(prop: NewProp, value: DoExpr<URI, Context, Output>) {
+        return new DoContextImpl<URI, NewContext<Context, NewProp, Output>>(this.monad, this.monad.chain(this.context, (context) => {
             const wrappedValue = isFn(value) ? value(context) : value
             return this.monad.map(wrappedValue, newValue => (<NewContext<Context, NewProp, Output>>{
                 ...context,
@@ -37,71 +24,81 @@ export class DoContext<URI extends URIS, Context extends {}> {
         }))
     }
     
-    /**
-     * Assigns a property in the context to a value derived from the current context
-     * @param prop the name of the property
-     * @param fn a function from the current context to the value to be assigned
-     */
     with<Output, NewProp extends string>(prop: NewProp, fn: EqFn<Context, Output>) {
-        return new DoContext<URI, NewContext<Context, NewProp, Output>>(this.monad, this.monad.map(this.context, (context) => (
+        return new DoContextImpl<URI, NewContext<Context, NewProp, Output>>(this.monad, this.monad.map(this.context, (context) => (
             <NewContext<Context, NewProp, Output>>{
                 ...context,
                 [prop]: fn(context)
             }
         )))
     }
-    /**
-     * Extracts a wrapped value from the context
-     * @param fn a function from the current context to the value to be returned
-     */
+
     yield<Output>(fn: (context: Context) => Output) {
         return this.monad.map(this.context, fn);
     }
 }
 
-export class DoContext2<URI extends URIS2, Context extends {}, A> {
-    constructor(private readonly monad: Monad2<URI>, readonly context: Type2<URI, A, Context>) { }
+// Monad 1 type defs
+type DoExpr1<URI extends URIS, Context extends {}, Output> = Type<URI, Output> | ((context: Context) => Type<URI, Output>)
+
+export type DoContext<URI extends URIS, Context extends {}> = {
     /**
      * Binds a property in the context to a wrapped value derived from the current context
      * @param prop the name of the property
      * @param value the wrapped value to be bound, or a function from the current context to a wrapped value to be bound
      */
-    bind<Output, NewProp extends string, NewA>(prop: NewProp, value: ForExpr2<URI, Context, NewA, Output>) {
-        const broaderContext: Type2<URI, A | NewA, Context> = this.context;
-        return new DoContext2<URI, NewContext<Context, NewProp, Output>, A | NewA>(this.monad, this.monad.chain(broaderContext, (context) => {
-            const wrappedValue = isFn(value) ? value(context) : value
-            return this.monad.map(wrappedValue, newValue => (<NewContext<Context, NewProp, Output>>{
-                ...context,
-                [prop]: newValue
-            }))
-        }))
-    }
-    
+    bind<Output, NewProp extends string>(prop: NewProp, value: DoExpr1<URI, Context, Output>):
+        DoContext<URI, NewContext<Context, NewProp, Output>>
+
     /**
      * Assigns a property in the context to a value derived from the current context
      * @param prop the name of the property
      * @param fn a function from the current context to the value to be assigned
      */
-    with<Output, NewProp extends string>(prop: NewProp, fn: EqFn<Context, Output>) {
-        return new DoContext2<URI, NewContext<Context, NewProp, Output>, A>(this.monad, this.monad.map(this.context, (context) => (
-            <NewContext<Context, NewProp, Output>>{
-                ...context,
-                [prop]: fn(context)
-            }
-        )))
-    }
+    with<Output, NewProp extends string>(prop: NewProp, fn: EqFn<Context, Output>): 
+        DoContext<URI, NewContext<Context, NewProp, Output>>
+        
+    yield<Output>(fn: (context: Context) => Output): Type<URI, Context>
+}
+
+// Monad 2 type defs
+type DoExpr2<URI extends URIS2, Context extends {}, A, Output> = Type2<URI, A, Output> | ((context: Context) => Type2<URI, A, Output>)
+
+export type DoContext2<URI extends URIS2, Context extends {}, A> = {
+    /**
+     * Binds a property in the context to a wrapped value derived from the current context
+     * @param prop the name of the property
+     * @param value the wrapped value to be bound, or a function from the current context to a wrapped value to be bound
+     */
+    bind<Output, NewProp extends string, NewA>(prop: NewProp, value: DoExpr2<URI, Context, NewA, Output>):
+        DoContext2<URI, NewContext<Context, NewProp, Output>, A | NewA>
+
+    /**
+     * Assigns a property in the context to a value derived from the current context
+     * @param prop the name of the property
+     * @param fn a function from the current context to the value to be assigned
+     */
+    with<Output, NewProp extends string>(prop: NewProp, fn: EqFn<Context, Output>): 
+        DoContext2<URI, NewContext<Context, NewProp, Output>, A>
+
     /**
      * Extracts a wrapped value from the context
      * @param fn a function from the current context to the value to be returned
      */
-    yield<Output>(fn: (context: Context) => Output) {
-        return this.monad.map(this.context, fn);
-    }
+    yield<Output>(fn: (context: Context) => Output): Type2<URI, A, Context>
 }
 
 /**
  * Initialises a new "do" comprehesion over the specified monad with an empty context
  * @param monad the fp-ts Monad1 definition
  */
-export const doOn = <URI extends URIS>(monad: Monad1<URI>) => new DoContext(monad, monad.of({}))
-export const doOn2 = <URI extends URIS2>(monad: Monad2<URI>) => new DoContext2<URI, {}, never>(monad, monad.of({}))
+export function doOn<URI extends URIS>(monad: Monad1<URI>): DoContext<URI, {}>;
+/**
+ * Initialises a new "do" comprehesion over the specified monad with an empty context
+ * @param monad the fp-ts Monad2 definition
+ */
+export function doOn<URI extends URIS2>(monad: Monad2<URI>): DoContext2<URI, {}, never>;
+export function doOn<URI extends URIS | URIS2>(monad: Monad1<URIS & URI> | Monad2<URIS2 & URI>) {
+    const m = <Monad<URI>> <any> monad
+    return <any> new DoContextImpl(m, m.of({}))
+}
