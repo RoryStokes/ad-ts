@@ -1,6 +1,6 @@
 # AD-Ts
 [![build status](https://img.shields.io/travis/RoryStokes/ad-ts/master.svg?style=flat-square)](https://travis-ci.org/RoryStokes/ad-ts)
-[![npm downloads](https://img.shields.io/npm/dt/@rorystokes/ad-ts.svg?style=flat-square)](https://www.npmjs.com/package/@rorystokes/ad-ts)
+[![npm downloads](https://img.shields.io/npm/dw/@rorystokes/ad-ts.svg?style=flat-square)](https://www.npmjs.com/package/@rorystokes/ad-ts)
 
 Bringing Pattern Matching and other ADT and Functional Programming concepts to TypeScript
 
