@@ -2,9 +2,42 @@
 [![build status](https://img.shields.io/travis/RoryStokes/ad-ts/master.svg?style=flat-square)](https://travis-ci.org/RoryStokes/ad-ts)
 [![npm downloads](https://img.shields.io/npm/dw/@rorystokes/ad-ts.svg?style=flat-square)](https://www.npmjs.com/package/@rorystokes/ad-ts)
 
-Bringing Pattern Matching and other ADT and Functional Programming concepts to TypeScript
+Bringing Pattern Matching and other ADT and Functional Programming concepts to TypeScript. Borrows
+heavily from and builds on top of @gcanti's [`fp-ts`](https://github.com/gcanti/fp-ts) library.
 
-## Getting Started
+## Submodules
+
+### `match`
+The `match` submodule provides simple, type-safe 'pattern matching' across a 
+[`TaggedUnion`](https://en.wikipedia.org/wiki/Tagged_union). This requires each instance of any of
+the types in the union to have an explicit `_tag` value to uniquely identify the type they belong
+to.
+
+Many of the types provided by [`fp-ts`](https://github.com/gcanti/fp-ts) including Option and Either
+already have such tags, and as such a `TaggedUnion` can be constructed using these types.
+
+`TaggedUnions` must be used instead of native TypeScript Unions as they encode the mapping from tags
+to types in a form that the type system can leverage to provide safety in match methods.
+
+### `caseclass`
+The `caseclass` submodule is designed to supplement the usage of `match`, providing an easy way to
+define a tagged type, including specifying default values.
+
+### `patternmatch`
+The `patternmatch` submodule allows for more generic pattern matching across any values. It always
+returns a [`fp-ts`](https://github.com/gcanti/fp-ts) Option, as exhaustivity testing is not 
+possible.
+
+Patterns can either be simple boolean guards, or extractor methods that return optional extracted
+results.
+
+### `do`
+The `do` submodule aims to provide equivalent syntax to `for` comprehensions in Scala or `do` in 
+Haskell (see [Wikipedia's page on Monads](https://en.wikipedia.org/wiki/Monad_(functional_programming)#Syntax_Sugar))
+
+This depends heavily on the `Monad` HKT defined by [`fp-ts`](https://github.com/gcanti/fp-ts).
+
+## Examples
 
 ### Do syntax
 ```ts
